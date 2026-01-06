@@ -108,7 +108,18 @@ const expenses = [
     isRecurring: false,
     aiConfidence: 88,
     date: new Date("2026-01-04T16:15:00Z")
-  }
+  },
+  {
+    userId: "64d123456789abcdef123456",
+    title: "Movie Night",
+    amount: 450,
+    category: "Entertainment",
+    expenseType: "Want",
+    paymentMode: "Cash",
+    isRecurring: false,
+    aiConfidence: 90,
+    date: new Date("2026-01-05T20:30:00Z")
+  },
 ];
 
 module.exports = { expenses };
