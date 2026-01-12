@@ -26,8 +26,8 @@ const expenseSchema = new mongoose.Schema({
   // Needs or Wants (unique feature)
   expenseType: {
     type: String,
-    enum: ["Need", "Want"],
-    default: "Need"
+    enum: ["expense"],
+    required: true
   },
 
   // How user paid

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Income</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, button { display: block; margin: 10px 0; padding: 8px; width: 300px; }
+  </style>
+</head>
+<body>
+  <h2>Add Income</h2>
+
+  <form action="/income/add" method="POST">
+    <input type="text" name="title" placeholder="Title" required />
+    <input type="number" name="amount" placeholder="Amount" required />
+    <input type="text" name="category" placeholder="Category" />
+    <button type="submit">Add Income</button>
+  </form>
+
+  <br>
+  <a href="/income/dashboard">Back to Dashboard</a>
+</body>
+</html>

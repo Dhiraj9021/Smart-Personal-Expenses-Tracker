@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Income</title>
+</head>
+<body>
+<h2>Edit Income</h2>
+
+<form action="/income/<%= income._id %>/edit" method="POST">
+  <input type="text" name="title" value="<%= income.title %>" required />
+  <input type="number" name="amount" value="<%= income.amount %>" required />
+  <input type="text" name="category" value="<%= income.category %>" />
+  <button type="submit">Update</button>
+  
+</form>
+
+<br>
+<a href="/dashboard">Back to Dashboard</a>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add Expense</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      background: #ffffff;
+      padding: 30px;
+      width: 380px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #4facfe;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #4facfe;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #2f80ed;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .link a {
+      text-decoration: none;
+      color: #4facfe;
+      font-weight: 500;
+    }
+
+    .link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h2>Add Expense</h2>
+
+    <form action="/test/add-expense" method="POST">
+      <input type="text" name="title" placeholder="Title" required />
+      <input type="number" name="amount" placeholder="Amount" required />
+      <select name="category" required>
+        <option value="">Select Category</option>
+        <option value="Food & Drinks">Food & Drinks</option>
+        <option value="Groceries">Groceries</option>
+        <option value="Shopping">Shopping</option>
+        <option value="Transport">Transport</option>
+        <option value="Entertainment">Entertainment</option>
+        <option value="Utilities">Utilities</option>
+        <option value="Health & Fitness">Health & Fitness</option>
+        <option value="Others">Others</option>
+        
+      </select>
+
+
+      <!-- Payment Mode -->
+      <select name="paymentMethod" required>
+        <option value="">Select Payment Mode</option>
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Card">Debit / Credit Card</option>
+        <option value="NetBanking">Net Banking</option>
+      </select>
+
+      <!-- Recurring -->
+      <div class="checkbox">
+        <input type="checkbox" name="isRecurring" value="true" />
+        <label>Recurring (Monthly)</label>
+      </div>
+
+      <!-- Hidden Type -->
+      <input type="hidden" name="expenseType" value="expense" />
+
+      <button type="submit">Add</button>
+    </form>
+
+    <div class="link">
+      <a href="/test/expenses">View Expenses →</a>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Income</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(135deg, #43cea2, #185a9d);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #fff;
+    }
+
+    .top-bar {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .top-bar a {
+      background: #27ae60;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .top-bar a:hover {
+      background: #1e8449;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+    }
+
+    .card h3 {
+      margin: 0;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .amount {
+      font-size: 22px;
+      font-weight: bold;
+      color: #27ae60;
+      margin-bottom: 10px;
+    }
+
+    .category {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .date {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .actions a,
+    .actions button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .actions a {
+      background: #2980b9;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .actions a:hover {
+      background: #1c5980;
+    }
+
+    .actions button {
+      background: #c0392b;
+      color: #fff;
+    }
+
+    .actions button:hover {
+      background: #96281b;
+    }
+
+    .empty {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    .summary {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>💰 Monthly Income Summary</h2>
+
+  <div class="summary">
+    <p>Total Income: ₹ <%= totalIncome %></p>
+  </div>
+
+  <div class="top-bar">
+    <a href="/income/add">➕ Add New Income</a>
+  </div>
+
+  <% if (incomes.length === 0) { %>
+    <div class="empty">
+      <p>No income records found</p>
+    </div>
+  <% } else { %>
+    <div class="container">
+      <% incomes.forEach(inc => { %>
+        <div class="card" id="inc-<%= inc._id %>">
+          <h3><%= inc.title %></h3>
+
+          <div class="amount">₹ <%= inc.amount %></div>
+
+          <div class="category">Category: <%= inc.category %></div>
+
+          <div class="date">
+            <%= inc.date ? inc.date.toDateString() : "-" %>
+          </div>
+
+          <div class="actions">
+            <a href="/income/<%= inc._id %>/edit">Edit</a>
+            <button onclick="deleteIncome('<%= inc._id %>')">Delete</button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <script>
+    async function deleteIncome(id) {
+      if (!confirm("Are you sure you want to delete this income?")) return;
+
+      try {
+        const res = await fetch(`/income/${id}`, {
+          method: "DELETE"
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          const card = document.getElementById(`inc-${id}`);
+          if (card) card.remove();
+          alert(data.message);
+        } else {
+          alert(data.message || "Error deleting income");
+        }
+      } catch (err) {
+        alert("Error deleting income");
+      }
+    }
+  </script>
+
+</body>
+</html>

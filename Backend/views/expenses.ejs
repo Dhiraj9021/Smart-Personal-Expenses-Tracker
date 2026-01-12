@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Expenses</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(135deg, #8ba1ff, #f4f4f4);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 30px;
+    }
+
+    .summary {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 25px;
+    }
+
+    .summary p {
+      margin: 5px 0;
+      font-size: 16px;
+    }
+
+    .top-bar {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .top-bar a {
+      background: #43cea2;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      position: relative;
+    }
+
+    .badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 4px 10px;
+      font-size: 12px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .badge.recurring {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      color: #444;
+    }
+
+    .amount {
+      font-size: 22px;
+      font-weight: bold;
+      color: #e74c3c;
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .date {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 15px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .actions a,
+    .actions button {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .actions a {
+      background: #3498db;
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .actions button {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    .empty {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 400px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="summary">
+    <p><strong>Total Income:</strong> ₹ <%= totalIncome %></p>
+    <p><strong>Total Expenses:</strong> ₹ <%= totalExpense %></p>
+    <p><strong>Remaining Balance:</strong> ₹ <%= remaining %></p>
+  </div>
+
+  <h2>💸 Your Expenses</h2>
+
+  <div class="top-bar">
+    <a href="/test/add-expense">➕ Add New Expense</a>
+  </div>
+
+  <% if (expenses.length === 0) { %>
+    <div class="empty">
+      <p>No expenses found</p>
+    </div>
+  <% } else { %>
+    <div class="container">
+      <% expenses.forEach(expense => { %>
+        <div class="card" id="row-<%= expense._id %>">
+
+          <% if (expense.isRecurring) { %>
+            <div class="badge recurring">🔁 Recurring</div>
+          <% } else { %>
+            <div class="badge">One-time</div>
+          <% } %>
+
+          <h3><%= expense.title %></h3>
+
+          <div class="amount">₹ <%= expense.amount %></div>
+
+          <div class="meta">📂 <%= expense.category || "General" %></div>
+          <div class="meta">💳 <%= expense.paymentMode || "N/A" %></div>
+
+          <div class="date">
+            📅 <%= expense.date ? expense.date.toDateString() : "-" %>
+          </div>
+
+          <div class="actions">
+            <a href="/test/expenses/<%= expense._id %>/edit">Edit</a>
+            <button onclick="deleteExpense('<%= expense._id %>')">Delete</button>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+  <script>
+    async function deleteExpense(id) {
+      if (!confirm("Are you sure you want to delete this expense?")) return;
+
+      try {
+        const res = await fetch(`/test/expenses/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById(`row-${id}`).remove();
+          alert(data.message);
+        } else {
+          alert(data.message || "Error deleting expense");
+        }
+      } catch {
+        alert("Error deleting expense");
+      }
+    }
+  </script>
+
+</body>
+</html>
