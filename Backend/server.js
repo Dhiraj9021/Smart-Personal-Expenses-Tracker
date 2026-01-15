@@ -1,7 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/db");
 require("dotenv").config();
-
+const cors = require('cors')
 const expenseRoutes = require("./routes/expenseRoutes");
 const incomeRoutes = require("./routes/IncomeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
@@ -14,7 +14,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 
 const app = express();
-const cors = require("cors");
+
 
 app.use(cors({
   origin: [
@@ -25,7 +25,6 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
-app.options("*", cors()); // handle preflight requests
 
 // Body parsers
 app.use(express.json());
