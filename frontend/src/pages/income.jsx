@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import {
+  FaBriefcase,
+  FaMoneyBillWave,
+  FaUniversity,
+  FaGift,
+  FaTag,
+} from "react-icons/fa";
+
 /* ---------- Time Ago Helper ---------- */
 const timeAgo = (date) => {
   if (!date) return "—";
@@ -21,6 +29,22 @@ const timeAgo = (date) => {
   return "Just now";
 };
 
+/* ---------- CATEGORY ICON ---------- */
+const incomeIcon = (category) => {
+  switch (category?.toLowerCase()) {
+    case "salary":
+      return <FaBriefcase className="text-success" />;
+    case "business":
+      return <FaMoneyBillWave className="text-green-600" />;
+    case "investment":
+      return <FaUniversity className="text-indigo-500" />;
+    case "gift":
+      return <FaGift className="text-pink-500" />;
+    default:
+      return <FaTag className="text-gray-400" />;
+  }
+};
+
 const Income = () => {
   const [incomes, setIncomes] = useState([]);
   const navigate = useNavigate();
@@ -32,34 +56,34 @@ const Income = () => {
       .catch(() => toast.error("Failed to load income data"));
   }, []);
 
-  /* ---------- FINANCIAL KPIs ---------- */
+  /* ---------- KPIs ---------- */
   const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
   const highestIncome = Math.max(...incomes.map((i) => i.amount), 0);
   const incomeSources = new Set(incomes.map((i) => i.category)).size;
 
+  /* ---------- DELETE ---------- */
   const deleteIncome = async (id) => {
-  if (!window.confirm("Delete this income?")) return;
+    if (!window.confirm("Delete this income?")) return;
 
-  try {
-    const res = await fetch(`http://localhost:5000/income/${id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    try {
+      const res = await fetch(`http://localhost:5000/income/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok || !data.success) {
-      toast.error(data.message || "Failed to delete income");
-      return;
+      if (!res.ok || !data.success) {
+        toast.error(data.message || "Failed to delete income");
+        return;
+      }
+
+      toast.success("Income deleted successfully");
+      setIncomes((prev) => prev.filter((i) => i._id !== id));
+    } catch {
+      toast.error("Server error");
     }
-
-    toast.success("Income deleted successfully");
-    setIncomes((prev) => prev.filter((i) => i._id !== id));
-  } catch (err) {
-    toast.error("Server error");
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-base-200 to-success/20 p-6">
@@ -74,37 +98,27 @@ const Income = () => {
         </p>
       </div>
 
-      {/* ---------- SUMMARY CARDS ---------- */}
+      {/* ---------- SUMMARY ---------- */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">Total Income</p>
-          <h3 className="text-2xl font-bold text-success mt-1">
-            ₹ {totalIncome}
-          </h3>
+          <h3 className="text-2xl font-bold text-success">₹ {totalIncome}</h3>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">This Month</p>
-          <h3 className="text-2xl font-bold text-primary mt-1">
-            ₹ {totalIncome}
-          </h3>
+          <h3 className="text-2xl font-bold text-primary">₹ {totalIncome}</h3>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">Income Sources</p>
-          <h3 className="text-2xl font-bold text-info mt-1">
-            {incomeSources}
-          </h3>
+          <h3 className="text-2xl font-bold text-info">{incomeSources}</h3>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">Highest Income</p>
-          <h3 className="text-2xl font-bold text-warning mt-1">
-            ₹ {highestIncome}
-          </h3>
+          <h3 className="text-2xl font-bold text-warning">₹ {highestIncome}</h3>
         </div>
-
       </div>
 
       {/* ---------- ADD BUTTON ---------- */}
@@ -117,13 +131,12 @@ const Income = () => {
         </button>
       </div>
 
-      {/* ---------- EMPTY STATE ---------- */}
+      {/* ---------- LIST ---------- */}
       {incomes.length === 0 ? (
-        <div className="max-w-md mx-auto bg-base-100 shadow-lg rounded-xl p-6 text-center">
-          <p className="text-gray-500">No income records found</p>
+        <div className="max-w-md mx-auto bg-base-100 shadow rounded-xl p-6 text-center">
+          No income records found
         </div>
       ) : (
-        /* ---------- INCOME CARDS ---------- */
         <div className="max-w-6xl mx-auto grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {incomes.map((i) => (
             <div
@@ -131,43 +144,43 @@ const Income = () => {
               className="relative bg-base-100 rounded-2xl shadow-lg p-6
                          hover:shadow-xl hover:-translate-y-1 transition"
             >
-              {/* TIME BADGE */}
-              <span className="absolute top-3 right-3 text-xs font-semibold
-                               bg-success/15 text-success px-3 py-1 rounded-full">
+              {/* TIME */}
+              <div className="absolute top-3 right-3 text-xs text-gray-400">
                 ⏱ {timeAgo(i.createdAt || i.date)}
-              </span>
+              </div>
 
               {/* TITLE */}
-              <h3 className="text-lg font-semibold mb-1">
-                {i.title}
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                {incomeIcon(i.category)}
+                <span className="truncate">{i.title}</span>
               </h3>
 
               {/* AMOUNT */}
-              <div className="text-2xl font-bold text-success mb-3">
+              <div className="text-2xl font-bold text-success my-2">
                 ₹ {i.amount}
               </div>
 
-              {/* META */}
-              <p className="text-sm text-gray-500">
-                Category: {i.category}
-              </p>
+              {/* CATEGORY */}
+              <span className="inline-block text-xs px-2 py-1 rounded-full bg-success/10 text-success">
+                {i.category}
+              </span>
 
-              <p className="text-xs text-gray-400 mb-4">
+              <div className="text-xs text-gray-400 mt-2">
                 {new Date(i.date).toDateString()}
-              </p>
+              </div>
 
               {/* ACTIONS */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => navigate(`/income/edit/${i._id}`)}
-                  className="btn btn-sm btn-outline btn-primary flex-1"
+                  className="btn btn-sm btn-outline btn-primary flex-1 hover:scale-105 transition"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => deleteIncome(i._id)}
-                  className="btn btn-sm btn-outline btn-error flex-1"
+                  className="btn btn-sm btn-outline btn-error flex-1 hover:scale-105 transition"
                 >
                   Delete
                 </button>

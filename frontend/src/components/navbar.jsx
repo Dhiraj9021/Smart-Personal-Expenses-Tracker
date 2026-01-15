@@ -97,7 +97,7 @@ export default function Navbar() {
         {/* LOGO */}
         <NavLink to="/" className="btn btn-ghost text-3xl font-bold text-gray-900">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            SmartExpense
+            ExpenseTracko
           </span>
         </NavLink>
       </div>

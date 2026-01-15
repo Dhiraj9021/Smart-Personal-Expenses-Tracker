@@ -48,6 +48,10 @@ app.set("view engine", "ejs");
 app.get("/api", (req, res) => {
   res.json({ message: "Backend connected successfully 🚀" });
 });
+
+app.get("/", (req, res) => {
+  res.send("🚀 Smart Personal Expenses Tracker API is running");
+});
 app.use(errorHandler);
 
 app.use("/auth", authRoutes); 

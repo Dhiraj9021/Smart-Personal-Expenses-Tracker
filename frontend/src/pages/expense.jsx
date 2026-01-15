@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import {
+  FaShoppingCart,
+  FaUtensils,
+  FaBus,
+  FaHome,
+  FaHeartbeat ,
+  FaTag,
+  FaSyncAlt,
+  FaFileInvoiceDollar,
+} from "react-icons/fa";
+
 /* ---------- Time Ago Helper ---------- */
 const timeAgo = (date) => {
   if (!date) return "—";
@@ -67,7 +78,7 @@ const Expenses = () => {
 
     if (res.ok) {
       toast.success("Expense is Deleted");
-    }else{
+    } else {
       toast.error("Failed to delete expense");
       return;
     }
@@ -78,6 +89,24 @@ const Expenses = () => {
   if (loading) {
     return <div className="text-center mt-20">Loading expenses...</div>;
   }
+
+  /* ---------- CATEGORY ICON ---------- */
+  const categoryIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case "food & drinks":
+        return <FaUtensils className="text-orange-500" />;
+      case "shopping":
+        return <FaShoppingCart className="text-pink-500" />;
+      case "transport":
+        return <FaBus className="text-blue-500" />;
+      case "utilities":
+        return <FaFileInvoiceDollar className="text-purple-500" />;
+      case "health & fitness":
+        return <FaHeartbeat  className="text-yellow-500" />;
+      default:
+        return <FaTag className="text-gray-400" />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-base-200 to-secondary/20 p-6">
@@ -143,11 +172,20 @@ const Expenses = () => {
                          hover:shadow-xl hover:-translate-y-1 transition"
             >
               {/* TAG */}
-              <div className="absolute top-3 right-3 text-xs text-gray-400">
-                ⏱ {timeAgo(e.createdAt || e.date)}
+              <div className="absolute top-3 right-3 flex-col items-center gap-2 text-xs text-gray-400">
+                {e.isRecurring && (
+                  <span className="flex items-center gap-1 text-info font-medium">
+                    <FaSyncAlt className="text-xs" />
+                    Recurring
+                  </span>
+                )}
+                <span>⏱ {timeAgo(e.createdAt || e.date)}</span>
               </div>
 
-              <h3 className="text-lg font-semibold">{e.title}</h3>
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                {categoryIcon(e.category)}
+                <span className="truncate">{e.title}</span>
+              </h3>
 
               <div className="text-2xl font-bold text-error my-2">
                 ₹ {e.amount}

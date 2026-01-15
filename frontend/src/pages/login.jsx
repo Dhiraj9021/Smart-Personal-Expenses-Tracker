@@ -42,7 +42,7 @@ export default function Login() {
         
         {/* Header */}
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-primary">Welcome Back 👋</h2>
+          <h2 className="text-3xl font-bold text-primary">Welcome Back </h2>
           <p className="text-sm text-gray-500 mt-1">
             Login to manage your expenses
           </p>

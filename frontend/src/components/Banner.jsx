@@ -53,7 +53,7 @@ export default function Banner() {
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
               <FaChartPie className="text-white text-xl" />
             </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">SmartExpense</h1>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900">ExpenseTracko</h1>
           </div>
 
           {/* Tagline */}
