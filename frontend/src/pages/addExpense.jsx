@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function AddExpense() {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ export default function AddExpense() {
     title: "",
     amount: "",
     category: "",
-    paymentMethod: "",
+    paymentMode: "",
     isRecurring: false
   });
 
@@ -37,14 +38,14 @@ export default function AddExpense() {
       const data = await res.json();
 
       if (res.ok) {
-        alert("Expense added ");
+        toast.success("Expense added ");
         navigate("/expense");
       } else {
-        alert(data.message || "Failed to add expense");
+        toast.error(data.message || "Failed to add expense");
       }
     } catch (err) {
       console.error(err);
-      alert("Server not responding");
+      toast.error("Server not responding");
     }
   };
 
@@ -94,7 +95,7 @@ export default function AddExpense() {
           <label className="block text-gray-700 mb-1 font-medium">Payment Mode</label>
           <select
           
-            name="paymentMethod"
+            name="paymentMode"
             required
             onChange={handleChange}
            

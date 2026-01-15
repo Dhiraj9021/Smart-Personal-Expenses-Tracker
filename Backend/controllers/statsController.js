@@ -1,16 +1,20 @@
 const User = require("../models/Users");
 const Visit = require("../models/Visit");
 const Expense = require("../models/Expense");
+const wrapAsync = require("../utils/wrapAsync");
 
-exports.getStats = async (req, res) => {
-  try {
-    const totalUsers = await User.countDocuments();
-    const totalVisits = await Visit.countDocuments();
-    const totalExpenses = await Expense.countDocuments();
+/* ================= GLOBAL STATS ================= */
+exports.getStats = wrapAsync(async (req, res) => {
+  const [totalUsers, totalVisits, totalExpenses] = await Promise.all([
+    User.countDocuments(),
+    Visit.countDocuments(),
+    Expense.countDocuments()
+  ]);
 
-    res.json({ totalUsers, totalVisits, totalExpenses });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+  res.status(200).json({
+    success: true,
+    totalUsers,
+    totalVisits,
+    totalExpenses
+  });
+});

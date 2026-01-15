@@ -1,87 +1,131 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 
 export default function EditExpense() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [expense, setExpense] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
+
+  /* ================= FETCH EXPENSE ================= */
   useEffect(() => {
     fetch(`http://localhost:5000/expense/${id}`, {
       credentials: "include",
     })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) throw new Error();
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.success) throw new Error(data.message);
         setExpense(data.expense);
       })
-      .catch(() => alert("Failed to load expense"))
+      .catch((err) => {
+        toast.error(err.message || "Failed to load expense");
+      })
       .finally(() => setLoading(false));
   }, [id]);
 
+  /* ================= SUBMIT ================= */
   const submitHandler = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`http://localhost:5000/expense/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(expense),
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Expense updated successfully!");
-        navigate("/expense");
-      } else {
-        alert(data.message || "Update failed");
-      }
-    } catch {
-      alert("Server error");
-    }
-  };
+  e.preventDefault();
+  setSaving(true);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (!expense) return <p className="text-center mt-10 text-red-500">Expense not found</p>;
+  try {
+    const res = await fetch(`http://localhost:5000/expense/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(expense),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      toast.error(data.message || "Update failed");
+      return;
+    }
+
+    toast.success("Expense updated successfully");
+    navigate("/expense");
+  } catch (err) {
+    toast.error(err.message || "Server error");
+  } finally {
+    setSaving(false);
+  }
+};
+
+
+  /* ================= STATES ================= */
+  if (loading) {
+    return <p className="text-center mt-10">Loading...</p>;
+  }
+
+  if (!expense) {
+    return (
+      <p className="text-center mt-10 text-red-500">
+        Expense not found
+      </p>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-error/20 via-base-200 to-primary/20 p-6 flex justify-center items-start">
+    <div className="min-h-screen bg-gradient-to-br from-error/20 via-base-200 to-primary/20 p-6 flex justify-center">
       <div className="bg-base-100 rounded-2xl shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-error mb-6 text-center">Edit Expense</h2>
 
+        <h2 className="text-2xl font-bold text-error mb-4 text-center">
+          Edit Expense
+        </h2>
+
+     
         <form onSubmit={submitHandler} className="space-y-4">
 
-          {/* Title */}
+          {/* TITLE */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Title</label>
+            <label className="block text-sm font-medium mb-1">Title</label>
             <input
               type="text"
               value={expense.title}
-              onChange={e => setExpense({ ...expense, title: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-error"
+              onChange={(e) =>
+                setExpense({ ...expense, title: e.target.value })
+              }
+              className="w-full input input-bordered"
               required
             />
           </div>
 
-          {/* Amount */}
+          {/* AMOUNT */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Amount (₹)</label>
+            <label className="block text-sm font-medium mb-1">
+              Amount (₹)
+            </label>
             <input
               type="number"
+              min="1"
               value={expense.amount}
-              onChange={e => setExpense({ ...expense, amount: Number(e.target.value) })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-error"
+              onChange={(e) =>
+                setExpense({
+                  ...expense,
+                  amount: Number(e.target.value),
+                })
+              }
+              className="w-full input input-bordered"
               required
             />
           </div>
 
-          {/* Category Dropdown */}
+          {/* CATEGORY */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Category</label>
+            <label className="block text-sm font-medium mb-1">
+              Category
+            </label>
             <select
               value={expense.category || ""}
-              onChange={e => setExpense({ ...expense, category: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-error"
+              onChange={(e) =>
+                setExpense({ ...expense, category: e.target.value })
+              }
+              className="w-full select select-bordered"
               required
             >
               <option value="">Select Category</option>
@@ -96,13 +140,20 @@ export default function EditExpense() {
             </select>
           </div>
 
-          {/* Payment Mode Dropdown */}
+          {/* PAYMENT MODE */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Payment Mode</label>
+            <label className="block text-sm font-medium mb-1">
+              Payment Mode
+            </label>
             <select
               value={expense.paymentMode || ""}
-              onChange={e => setExpense({ ...expense, paymentMode: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-error"
+              onChange={(e) =>
+                setExpense({
+                  ...expense,
+                  paymentMethod: e.target.value,
+                })
+              }
+              className="w-full select select-bordered"
               required
             >
               <option value="">Select Payment Mode</option>
@@ -113,33 +164,38 @@ export default function EditExpense() {
             </select>
           </div>
 
-          {/* Date */}
+          {/* DATE */}
           <div>
-            <label className="block text-gray-700 mb-1 font-medium">Date</label>
+            <label className="block text-sm font-medium mb-1">Date</label>
             <input
               type="date"
-              value={expense.date ? new Date(expense.date).toISOString().substr(0, 10) : ""}
-              onChange={e => setExpense({ ...expense, date: e.target.value })}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-error"
+              value={
+                expense.date
+                  ? new Date(expense.date).toISOString().slice(0, 10)
+                  : ""
+              }
+              onChange={(e) =>
+                setExpense({ ...expense, date: e.target.value })
+              }
+              className="w-full input input-bordered"
               required
             />
           </div>
 
-        
-
-          {/* Buttons */}
-          <div className="flex gap-4 mt-4">
+          {/* ACTIONS */}
+          <div className="flex gap-3 pt-3">
             <button
               type="submit"
-              className="flex-1 btn btn-error px-4 py-2 font-medium hover:scale-105 transition"
+              disabled={saving}
+              className="btn btn-error flex-1"
             >
-              Update
+              {saving ? "Updating..." : "Update"}
             </button>
 
             <button
               type="button"
               onClick={() => navigate("/expense")}
-              className="flex-1 btn btn-outline btn-primary px-4 py-2 font-medium hover:scale-105 transition"
+              className="btn btn-outline flex-1"
             >
               Cancel
             </button>

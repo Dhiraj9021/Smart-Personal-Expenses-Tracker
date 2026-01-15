@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -14,24 +15,24 @@ export default function Register() {
       const res = await fetch("http://localhost:5000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({ username, email, password}),
         credentials: "include",
       });
 
       const data = await res.json();
 
       if (data.success) {
-        alert(data.message);
+        toast.success(data.message);
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("username", data.username);
         navigate("/dashboard");
         window.location.reload();
       } else {
-        alert(data.message || "Registration failed");
+        toast.error(data.message || "Registration failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Server error");
+      toast.error("Server error");
     }
   };
 

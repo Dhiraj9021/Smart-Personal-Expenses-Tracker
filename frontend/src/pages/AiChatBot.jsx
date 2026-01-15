@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { toast } from 'react-toastify';
 
 export default function AiChatBot() {
   const [messages, setMessages] = useState([
@@ -28,7 +29,7 @@ export default function AiChatBot() {
       const data = await res.json();
       return data.reply || "I couldn’t generate a response right now.";
     } catch (err) {
-      return "⚠️ AI server error. Please try again.";
+      toast.warning(" AI server error. Please try again.");
     }
   };
 

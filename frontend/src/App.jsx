@@ -14,6 +14,7 @@ import Navbar from "./components/navbar";
 import Banner from "./components/Banner";
 import Footer from "./components/Footer";
 import AiChatBot from "./pages/AiChatBot";
+import Analytics from "./pages/Analytics";
 
 function App() {
   return (
@@ -26,6 +27,8 @@ function App() {
         <Route path="/register" element={<Register />} />
          <Route path="/aichat" element={<AiChatBot />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/analytics" element={<Analytics />} />
+
 
         <Route path="/expense" element={<Expense />} />
         <Route path="/expense/add" element={<Expenseadd />} />

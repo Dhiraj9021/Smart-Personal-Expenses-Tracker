@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ThemeToggle from "./ThemeToggle";
+
 export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -40,7 +41,7 @@ export default function Navbar() {
       <div className="navbar-start">
         {/* MOBILE MENU TOGGLE */}
         <div className="dropdown">
-          <label tabIndex={0} className="btn btn-ghost lg:hidden">
+          <label tabIndex={0} className="btn btn-ghost lg:hidden ">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -55,15 +56,15 @@ export default function Navbar() {
           {/* MOBILE MENU CONTENT */}
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-white rounded-box w-52"
+            className="menu menu-sm dropdown-content p- shadow bg-white rounded-box w-52"
           >
             {user ? (
               <>
-                <li><NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink></li>
-                <li><NavLink to="/add" className={linkClass}>Add Transaction</NavLink></li>
+                <li><NavLink to="/dashboard" className={linkClass}>Home</NavLink></li>
+                <li><NavLink to="/analytics" className={linkClass}>Analytics</NavLink></li>
                 <li><NavLink to="/income" className={linkClass}>Income</NavLink></li>
                 <li><NavLink to="/expense" className={linkClass}>Expenses</NavLink></li>
-                <li><NavLink to="/aichat" className={linkClass}>🤖 AI Assistant</NavLink></li>
+                <li><NavLink to="/aichat" className={linkClass}>AI Assistant</NavLink></li>
                 
                 {/* USER PROFILE IN MOBILE */}
                 <li className="mt-4 pt-4 border-t">
@@ -105,8 +106,8 @@ export default function Navbar() {
       {user && (
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal gap-2 font-medium">
-            <li><NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink></li>
-            <li><NavLink to="/add" className={linkClass}>Add</NavLink></li>
+            <li><NavLink to="/dashboard" className={linkClass}>Home</NavLink></li>
+            <li><NavLink to="/analytics" className={linkClass}>Analytics</NavLink></li>
             <li><NavLink to="/income" className={linkClass}>Income</NavLink></li>
             <li><NavLink to="/expense" className={linkClass}>Expenses</NavLink></li>
             <li><NavLink to="/aichat" className={linkClass}>🤖 AI Assistant</NavLink></li>

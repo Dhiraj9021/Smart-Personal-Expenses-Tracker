@@ -10,52 +10,19 @@ const {
   showExpenses,
 } = require("../controllers/expenseController");
 
-// View all
+// View all expenses
 router.get("/", authMiddleware, showExpenses);
 
-// Add
+// Add new expense/income
 router.post("/add", authMiddleware, handleAddExpenseForm);
 
-// ✅ Edit (React)
+// Get single expense
 router.get("/:id", authMiddleware, getExpenseById);
+
+// Update expense
 router.put("/:id", authMiddleware, updateExpense);
 
-// Delete
+// Delete expense
 router.delete("/:id", authMiddleware, deleteExpense);
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-// const express = require("express");
-// const router = express.Router();
-// const authMiddleware = require("../middleware/authMiddleware");
-// const {
-//   showAddExpenseForm,
-//   handleAddExpenseForm,
-//   showExpenses,
-//   deleteExpense,
-//   showEditExpenseForm,
-//   updateExpense,
-// } = require("../controllers/expenseController");
-
-// // Add
-// router.get("/add",authMiddleware , showAddExpenseForm);
-// router.post("/add",authMiddleware , handleAddExpenseForm);
-
-// // View
-// router.get("/", authMiddleware ,showExpenses);
-
-// // Edit
-// router.get("/edit/:id", authMiddleware, showEditExpenseForm);
-// router.post("/edit/:id", authMiddleware, updateExpense);
-
-// // Delete
-// router.delete("/:id", authMiddleware, deleteExpense);
-// module.exports = router;

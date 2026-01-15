@@ -1,270 +1,201 @@
+const mongoose = require("mongoose");  
 const Income = require("../models/Income");
+const Expense = require("../models/Expense");
+const wrapAsync = require("../utils/wrapAsync");
 
-// ✅ Show income entries (JSON)
-exports.showIncome = async (req, res) => {
-  try {
-    const incomes = await Income.find({
-      userId: req.session.userId
-    }).sort({ date: -1 });
-
-    const now = new Date();
-
-    const monthlyIncome = incomes.filter(
-      i =>
-        i.date.getMonth() === now.getMonth() &&
-        i.date.getFullYear() === now.getFullYear()
-    );
-
-    const totalIncome = monthlyIncome.reduce(
-      (sum, i) => sum + i.amount,
-      0
-    );
-
-    // ✅ JSON instead of res.render
-    res.json({
-      incomes: monthlyIncome,
-      totalIncome
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching income" });
+/* ================= GET MONTHLY INCOME ================= */
+exports.showIncome = wrapAsync(async (req, res) => {
+  if (!req.session.userId) {
+    const err = new Error("Unauthorized");
+    err.status = 401;
+    throw err;
   }
-};
 
-// ❌ Remove EJS add-income form
+  const incomes = await Income.find({
+    userId: req.session.userId
+  }).sort({ date: -1 });
+
+  const now = new Date();
+
+  const monthlyIncome = incomes.filter(
+    (i) =>
+      i.date.getMonth() === now.getMonth() &&
+      i.date.getFullYear() === now.getFullYear()
+  );
+
+  const totalIncome = monthlyIncome.reduce(
+    (sum, i) => sum + i.amount,
+    0
+  );
+
+  res.json({
+    success: true,
+    incomes: monthlyIncome,
+    totalIncome
+  });
+});
+
+/*  EJS NOT SUPPORTED */
 exports.showAddIncomeForm = (req, res) => {
-  res.status(400).json({ message: "Not supported in API mode" });
+  res.status(400).json({
+    success: false,
+    message: "Not supported in API mode"
+  });
 };
 
-// ✅ Add income (JSON)
-exports.handleAddIncomeForm = async (req, res) => {
-  try {
-    const income = await Income.create({
-      title: req.body.title,
-      amount: Number(req.body.amount),
-      category: req.body.category || "General",
-      date: new Date(),
-      userId: req.session.userId,
+/* ================= ADD INCOME ================= */
+exports.handleAddIncomeForm = wrapAsync(async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  let { title, amount, category } = req.body;
+
+  if (!title || amount === undefined) {
+    return res.status(422).json({ success: false, message: "Title and amount are required" });
+  }
+
+  amount = Number(amount);
+
+  if (isNaN(amount) || amount <= 0) {
+    return res.status(422).json({
+      success: false,
+      message: "Amount must be a positive number",
     });
+  }
 
-    // ✅ JSON instead of redirect
-    res.status(201).json({
-      success: true,
-      message: "Income added successfully",
-      income
+  const income = await Income.create({
+    title,
+    amount, // guaranteed positive
+    category: category || "General",
+    date: new Date(),
+    userId: req.session.userId,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Income added successfully",
+    income,
+  });
+});
+
+/* ================= GET SINGLE INCOME ================= */
+exports.showEditIncomeForm = wrapAsync(async (req, res) => {
+  if (!req.session.userId) {
+    const err = new Error("Unauthorized");
+    err.status = 401;
+    throw err;
+  }
+
+  const income = await Income.findOne({
+    _id: req.params.id,
+    userId: req.session.userId
+  });
+
+  if (!income) {
+    const err = new Error("Income not found");
+    err.status = 404;
+    throw err;
+  }
+
+  res.json({
+    success: true,
+    income
+  });
+});
+
+/* ================= UPDATE INCOME ================= */
+exports.updateIncome = wrapAsync(async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  let { title, amount, category, date } = req.body;
+
+  if (!title || amount === undefined) {
+    return res.status(422).json({ success: false, message: "Title and amount are required" });
+  }
+
+  amount = Number(amount);
+
+  if (isNaN(amount) || amount <= 0) {
+    return res.status(422).json({
+      success: false,
+      message: "Amount must be a positive number",
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error saving income" });
   }
-};
-// GET single income (for edit page)
-exports.showEditIncomeForm = async (req, res) => {
-  try {
-    const income = await Income.findById(req.params.id);
-    if (!income)
-      return res.status(404).json({ message: "Income not found" });
 
-    res.json({ success: true, income });
-  } catch (err) {
-    res.status(500).json({ message: "Error loading income" });
+  const updatedIncome = await Income.findOneAndUpdate(
+    { _id: req.params.id, userId: req.session.userId },
+    {
+      title,
+      amount,
+      category: category || "General",
+      date: date ? new Date(date) : undefined
+    },
+    { new: true }
+  );
+
+  if (!updatedIncome) {
+    return res.status(404).json({ success: false, message: "Income not found" });
   }
-};
 
-// UPDATE income
-exports.updateIncome = async (req, res) => {
-  try {
-    const updatedIncome = await Income.findByIdAndUpdate(
-      req.params.id,
-      {
-        title: req.body.title,
-        amount: req.body.amount,
-        category: req.body.category,
-        userId: req.session.userId,
-        date: req.body.date || Date.now(),
-      },
-      { new: true }
-    );
+  res.json({
+    success: true,
+    message: "Income updated successfully",
+    updatedIncome,
+  });
+});
 
-    res.json({
-      success: true,
-      message: "Income updated successfully",
-      updatedIncome
+
+
+/*========== DELETE INCOME ================= */
+
+exports.deleteIncome = wrapAsync(async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const userId = req.session.userId; // keep as string
+  const incomeId = req.params.id;    // keep as string
+
+  //  Find income to delete
+  const incomeToDelete = await Income.findOne({ _id: incomeId, userId });
+  if (!incomeToDelete) {
+    return res.status(404).json({ success: false, message: "Income not found" });
+  }
+
+  //  Calculate monthly income excluding this one
+  const now = new Date();
+  const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const monthlyIncome = await Income.find({
+    userId,
+    date: { $gte: startDate, $lt: endDate },
+    _id: { $ne: incomeId } // exclude the income being deleted
+  });
+
+  const totalIncome = monthlyIncome.reduce((sum, inc) => sum + Number(inc.amount), 0);
+
+  //  Calculate monthly expenses
+  const monthlyExpenses = await Expense.find({
+    userId,
+    date: { $gte: startDate, $lt: endDate }
+  });
+
+  const totalExpense = monthlyExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+
+  //  Check if deletion is safe
+  if (totalIncome < totalExpense) {
+    return res.status(400).json({
+      success: false,
+      message: `Cannot delete this income.Your Income become less than Expense.`
     });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating income" });
   }
-};
 
-// // ❌ Remove EJS edit form
-// exports.showEditIncomeForm = async (req, res) => {
-//   try {
-//     const income = await Income.findById(req.params.id);
-//     if (!income)
-//       return res.status(404).json({ message: "Income not found" });
+  //  Safe to delete
+  await Income.deleteOne({ _id: incomeId });
 
-//     res.json({ income });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Error loading income" });
-//   }
-// };
-
-// // ✅ Update income (JSON)
-// exports.updateIncome = async (req, res) => {
-//   try {
-//     const updatedIncome = await Income.findByIdAndUpdate(
-//       req.params.id,
-//       {
-//         title: req.body.title,
-//         amount: req.body.amount,
-//         category: req.body.category,
-//         userId: req.session.userId,
-//         date: req.body.date || Date.now(),
-//       },
-//       { new: true }
-//     );
-
-//     res.json({
-//       success: true,
-//       message: "Income updated successfully",
-//       updatedIncome
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Error updating income" });
-//   }
-// };
-
-// ✅ Delete income (already JSON – kept same)
-exports.deleteIncome = async (req, res) => {
-  try {
-    await Income.findByIdAndDelete(req.params.id);
-    res.json({ message: "Income deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const Income = require("../models/Income");
-
-// // Show income entries
-// exports.showIncome = async (req, res) => {
-//   try {
-//     const incomes = await Income.find({ userId: req.session.userId }).sort({ date: -1 });
-
-//     const now = new Date();
-//     const monthlyIncome = incomes.filter(
-//       i => i.date.getMonth() === now.getMonth() && i.date.getFullYear() === now.getFullYear()
-//     );
-
-//     const totalIncome = monthlyIncome.reduce((sum, i) => sum + i.amount, 0);
-
-//     res.render("income", { incomes: monthlyIncome, totalIncome });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Error fetching income");
-//   }
-// };
-
-
-
-// // Show add income form
-// exports.showAddIncomeForm = (req, res) => {
-//   res.render("addIncome"); // create this EJS file similar to addExpense
-// };
-
-// // add income 
-// exports.handleAddIncomeForm = async (req, res) => {
-//   try {
-//     await Income.create({
-//       title: req.body.title,
-//       amount: Number(req.body.amount),
-//       category: req.body.category || "General",
-//       date: new Date(),
-//       userId: req.session.userId,
-//     });
-//     res.redirect("/dashboard"); // redirect to dashboard after adding
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Error saving income");
-//   }
-// };
-
-// //edit income form
-// exports.showEditIncomeForm = async (req, res) => {
-//   try {
-//     const income = await Income.findById(req.params.id);
-//     if (!income) return res.status(404).send("Income not found");
-
-//     res.render("editIncome", { income });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Error loading edit form");
-//   }
-// };
-
-// // Update income
-// exports.updateIncome = async (req, res) => {
-//   try {
-//     await Income.findByIdAndUpdate(req.params.id, {
-//       title: req.body.title,
-//       amount: req.body.amount,
-//       category: req.body.category,
-//       userId: req.session.userId,
-//       date: req.body.date || Date.now(),
-//     });
-
-//     res.redirect("/dashboard");
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Error updating income");
-//   }
-// };
-
-// // Delete income
-// exports.deleteIncome = async (req, res) => {
-//   try {
-//     await Income.findByIdAndDelete(req.params.id);
-//     res.json({ message: "Income deleted successfully" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: err.message });
-//   }
-// };
+  res.json({ success: true, message: "Income deleted successfully" });
+});

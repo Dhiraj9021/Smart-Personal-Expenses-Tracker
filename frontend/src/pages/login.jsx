@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -20,17 +21,17 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        alert(data.message);
+        toast.success(data.message);
          localStorage.setItem("userId", data.userId);
          localStorage.setItem("username", data.username);
         navigate("/dashboard");
         window.location.reload();
       } else {
-        alert(data.message || "Login failed");
+        toast.warning(data.message || "Login failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Server error");
+      toast.error("Server error");
     }
   };
 

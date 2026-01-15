@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { toast } from 'react-toastify';
 
 export default function EditIncome() {
   const { id } = useParams();
@@ -17,7 +18,7 @@ export default function EditIncome() {
         if (!data.success) throw new Error();
         setIncome(data.income);
       })
-      .catch(() => alert("Failed to load income"))
+      .catch(() => toast.error("Failed to load income"))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -34,13 +35,13 @@ export default function EditIncome() {
 
       const data = await res.json();
       if (data.success) {
-        alert("Income updated successfully!");
+        toast.success("Income updated successfully!");
         navigate("/income");
       } else {
-        alert(data.message || "Failed to update income");
+        toast.error(data.message || "Failed to update income");
       }
     } catch (err) {
-      alert("Server error");
+      toast.error("Server error");
     }
   };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from 'react-toastify';
 /* ---------- Time Ago Helper ---------- */
 const timeAgo = (date) => {
   if (!date) return "—";
@@ -29,7 +29,7 @@ const Income = () => {
     fetch("http://localhost:5000/income", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setIncomes(data.incomes || []))
-      .catch(() => alert("Failed to load income data"));
+      .catch(() => toast.error("Failed to load income data"));
   }, []);
 
   /* ---------- FINANCIAL KPIs ---------- */
@@ -38,15 +38,28 @@ const Income = () => {
   const incomeSources = new Set(incomes.map((i) => i.category)).size;
 
   const deleteIncome = async (id) => {
-    if (!window.confirm("Delete this income?")) return;
+  if (!window.confirm("Delete this income?")) return;
 
-    await fetch(`http://localhost:5000/income/${id}`, {
+  try {
+    const res = await fetch(`http://localhost:5000/income/${id}`, {
       method: "DELETE",
       credentials: "include",
     });
 
-    setIncomes(incomes.filter((i) => i._id !== id));
-  };
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      toast.error(data.message || "Failed to delete income");
+      return;
+    }
+
+    toast.success("Income deleted successfully");
+    setIncomes((prev) => prev.filter((i) => i._id !== id));
+  } catch (err) {
+    toast.error("Server error");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-base-200 to-success/20 p-6">

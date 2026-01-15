@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 export default function AddIncome() {
   const navigate = useNavigate();
@@ -22,11 +23,16 @@ export default function AddIncome() {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      alert(data.message || "Income added");
-      if (data.success) navigate("/income");
-    } catch {
-      alert("Server error");
-    }
+    if (res.ok) {
+            toast.success("income added ");
+            navigate("/income");
+          } else {
+            toast.error(data.message || "Failed to add expense");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Server not responding");
+        }
   };
 
   return (
