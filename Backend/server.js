@@ -15,7 +15,8 @@ const MongoStore = require("connect-mongo");
 
 const app = express();
 app.use(cors({
-  origin: "http://localhost:5173", // frontend URL
+  origin: ["http://localhost:5173", "https://smart-personal-expenses-tracker.vercel.app"],
+  
   credentials: true,               // allow cookies/sessions
 }));
 // Body parsers
