@@ -50,7 +50,7 @@ const Income = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/income", { credentials: "include" })
+    fetch(`${import.meta.env.VITE_API_URL}/income`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setIncomes(data.incomes || []))
       .catch(() => toast.error("Failed to load income data"));

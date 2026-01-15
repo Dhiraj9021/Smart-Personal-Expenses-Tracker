@@ -38,7 +38,7 @@ const Expenses = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/expense", { credentials: "include" })
+    fetch(`${import.meta.env.VITE_API_URL}/expense`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         setExpenses(data.expenses || []);

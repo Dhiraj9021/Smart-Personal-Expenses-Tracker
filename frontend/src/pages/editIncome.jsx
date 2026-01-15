@@ -10,7 +10,7 @@ export default function EditIncome() {
 
   // Fetch income details
   useEffect(() => {
-    fetch(`http://localhost:5000/income/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/income/${id}`, {
       credentials: "include",
     })
       .then(res => res.json())

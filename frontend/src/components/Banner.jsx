@@ -12,7 +12,7 @@ export default function Banner() {
 
     const fetchStats = async () => {
       try {
-        const res = await fetch("http://localhost:5000/stats", { credentials: "include" });
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/stats`, { credentials: "include" });
         const data = await res.json();
         setStats(data);
       } catch (err) {

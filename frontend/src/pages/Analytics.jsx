@@ -22,7 +22,7 @@ export default function Analytics() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:5000/dashboard", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/dashboard`, {
           credentials: "include",
         });
         const result = await res.json();

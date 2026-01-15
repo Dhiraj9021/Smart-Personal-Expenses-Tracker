@@ -19,7 +19,7 @@ export default function AiChatBot() {
 
   const sendMessageToAI = async (message) => {
     try {
-      const res = await fetch("http://localhost:5000/aichat", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/aichat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

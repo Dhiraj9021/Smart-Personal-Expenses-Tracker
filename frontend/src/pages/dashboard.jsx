@@ -34,7 +34,7 @@ export default function Dashboard() {
     try {
       setError("");
 
-      const res = await fetch(`http://localhost:5000/dashboard`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/dashboard`, {
         credentials: "include",
       });
 
