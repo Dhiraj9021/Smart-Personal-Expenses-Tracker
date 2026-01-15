@@ -1,7 +1,7 @@
 const express = require("express");
 const connectDB = require("./config/db");
 require("dotenv").config();
-const cors = require('cors')
+
 const expenseRoutes = require("./routes/expenseRoutes");
 const incomeRoutes = require("./routes/IncomeRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
@@ -14,11 +14,19 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 
 const app = express();
+const cors = require("cors");
+
 app.use(cors({
-  origin: ["http://localhost:5173", "https://expensetracko.vercel.app"],
-  
+  origin: [
+    "http://localhost:5173",
+    "https://expensetracko.vercel.app"
+  ],
   credentials: true,               // allow cookies/sessions
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
+
+app.options("*", cors()); // handle preflight requests
+
 // Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
