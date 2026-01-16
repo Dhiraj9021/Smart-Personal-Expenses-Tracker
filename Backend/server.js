@@ -17,13 +17,10 @@ const app = express();
 
 // --- CORS ---
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://expensetracko.vercel.app"
-  ],
-  credentials: true,
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"]
+  origin: "https://expensetracko.vercel.app",
+  credentials: true
 }));
+
 
 // --- Body parser ---
 app.use(express.json());
@@ -34,6 +31,7 @@ connectDB();
 
 // --- Session ---
 app.use(session({
+  name: "connect.sid",
   secret: process.env.SESSION_SECRET || "expense_tracker_secret",
   resave: false,
   saveUninitialized: false,
@@ -42,12 +40,16 @@ app.use(session({
   }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
-    sameSite: "lax",
-    secure: false
+    httpOnly: true,
+    sameSite: "none", // ✅ REQUIRED for Vercel → Render
+    secure: true      // ✅ REQUIRED (HTTPS)
   }
 }));
 
+
 // --- View engine ---
+app.set("trust proxy", 1); // REQUIRED for Render
+
 app.set("view engine", "ejs");
 
 // --- Routes ---
