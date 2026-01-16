@@ -66,7 +66,7 @@ const Income = () => {
     if (!window.confirm("Delete this income?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/income/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/income/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
