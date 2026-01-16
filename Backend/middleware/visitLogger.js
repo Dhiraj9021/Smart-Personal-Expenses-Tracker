@@ -1,16 +1,24 @@
-
 const Visit = require("../models/Visit");
 
-const visitLogger = async (req, res, next) => {
+module.exports = async (req, res, next) => {
   try {
-    // Log only GET requests to "/"
+    // Only track GET requests to the home page
     if (req.method === "GET" && req.path === "/") {
-      await Visit.create({ ip: req.ip });
+
+      // Track unique visits per session
+      if (!req.session.hasVisited) {
+        await Visit.create({
+          ip: req.ip,
+          userId: req.session.userId || null // store userId if logged in
+        });
+
+        // Mark this session as visited
+        req.session.hasVisited = true;
+      }
     }
   } catch (err) {
     console.error("Failed to log visit:", err.message);
   }
+
   next();
 };
-
-module.exports = visitLogger;
