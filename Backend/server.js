@@ -12,7 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const aichat = require("./routes/ai-chat");
 const statsRouter = require("./routes/statsRouter");
 const errorHandler = require("./middleware/errorHandler");
-
+const visitLogger = require("./middleware/visitLogger");
 const app = express();
 app.set("trust proxy", 1); // REQUIRED for Render
 // --- CORS ---
@@ -55,7 +55,7 @@ app.set("view engine", "ejs");
 // --- Routes ---
 app.get("/api", (req,res) => res.json({ message: "Backend connected 🚀" }));
 app.get("/", (req,res) => res.send("🚀 Smart Personal Expenses Tracker API"));
-
+app.use(visitLogger);
 // API routes
 app.use("/auth", authRoutes);
 app.use("/aichat", aichat);
