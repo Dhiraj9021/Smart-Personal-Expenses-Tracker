@@ -37,7 +37,7 @@ export default function Banner() {
     {
       icon: <FaUsers />,
       value: stats.totalUsers.toLocaleString(),
-      label: "Active Users",
+      label: "Registered Users",
       description: "Managing their finances",
       color: "text-blue-600",
       bgColor: "bg-blue-50",
