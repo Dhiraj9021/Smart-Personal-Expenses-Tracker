@@ -34,7 +34,7 @@ app.use(session({
   name: "connect.sid",
   secret: process.env.SESSION_SECRET || "expense_tracker_secret",
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI
   }),
