@@ -71,7 +71,7 @@ const Expenses = () => {
   const deleteExpense = async (id) => {
     if (!window.confirm("Delete this expense?")) return;
 
-    const res = await fetch(`http://localhost:5000/expense/${id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/expense/${id}`, {
       method: "DELETE",
       credentials: "include",
     });

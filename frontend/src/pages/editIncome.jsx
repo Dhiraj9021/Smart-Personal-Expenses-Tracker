@@ -26,7 +26,7 @@ export default function EditIncome() {
     e.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:5000/income/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/income/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

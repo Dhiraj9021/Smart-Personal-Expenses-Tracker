@@ -33,7 +33,7 @@ export default function EditExpense() {
   setSaving(true);
 
   try {
-    const res = await fetch(`http://localhost:5000/expense/${id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/expense/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
