@@ -24,13 +24,13 @@ exports.registerUser = wrapAsync(async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await User.create({
-    username,
-    email,
+    username: username.trim(),
+    email: email.toLowerCase().trim(),
     password: hashedPassword
   });
 
-  // Session
-  req.session.userId = user._id;
+  // ✅ SESSION
+  req.session.userId = user._id.toString();
   req.session.username = user.username;
 
   res.status(201).json({
@@ -52,7 +52,7 @@ exports.loginUser = wrapAsync(async (req, res) => {
     });
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
   if (!user) {
     return res.status(401).json({
       success: false,
@@ -68,8 +68,8 @@ exports.loginUser = wrapAsync(async (req, res) => {
     });
   }
 
-  // success
-  req.session.userId = user._id;
+  // ✅ SESSION
+  req.session.userId = user._id.toString();
   req.session.username = user.username;
 
   res.status(200).json({
@@ -80,17 +80,23 @@ exports.loginUser = wrapAsync(async (req, res) => {
   });
 });
 
-
 /* ================= LOGOUT ================= */
 exports.logoutUser = wrapAsync(async (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      const error = new Error("Logout failed");
-      error.status = 500;
-      throw error;
+      return res.status(500).json({
+        success: false,
+        message: "Logout failed"
+      });
     }
 
-    res.clearCookie("connect.sid");
+    // ✅ IMPORTANT: cookie options must match session config
+    res.clearCookie("connect.sid", {
+      path: "/",
+      sameSite: "none",
+      secure: true
+    });
+
     res.json({
       success: true,
       message: "Logged out successfully"

@@ -26,7 +26,7 @@ export default function Register() {
         localStorage.setItem("userId", data.userId);
         localStorage.setItem("username", data.username);
         navigate("/dashboard");
-        window.location.reload();
+       
       } else {
         toast.error(data.message || "Registration failed");
       }

@@ -14,7 +14,7 @@ const statsRouter = require("./routes/statsRouter");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
-
+app.set("trust proxy", 1); // REQUIRED for Render
 // --- CORS ---
 app.use(cors({
   origin: "https://expensetracko.vercel.app",
@@ -48,7 +48,7 @@ app.use(session({
 
 
 // --- View engine ---
-app.set("trust proxy", 1); // REQUIRED for Render
+
 
 app.set("view engine", "ejs");
 

@@ -25,7 +25,7 @@ export default function Login() {
          localStorage.setItem("userId", data.userId);
          localStorage.setItem("username", data.username);
         navigate("/dashboard");
-        window.location.reload();
+      
       } else {
         toast.warning(data.message || "Login failed");
       }
