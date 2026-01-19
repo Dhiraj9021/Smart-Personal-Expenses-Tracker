@@ -13,7 +13,6 @@ import {
 const timeAgo = (date) => {
   if (!date) return "—";
   const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
   const intervals = [
     { label: "yr", value: 31536000 },
     { label: "mo", value: 2592000 },
@@ -21,7 +20,6 @@ const timeAgo = (date) => {
     { label: "hr", value: 3600 },
     { label: "min", value: 60 },
   ];
-
   for (const i of intervals) {
     const count = Math.floor(seconds / i.value);
     if (count >= 1) return `${count}${i.label} ago`;
@@ -46,93 +44,153 @@ const incomeIcon = (category) => {
 };
 
 const Income = () => {
-  const [incomes, setIncomes] = useState([]);
   const navigate = useNavigate();
 
+  /* ---------- STATES ---------- */
+  const [incomes, setIncomes] = useState([]);
+  const [category, setCategory] = useState("all");
+  const [month, setMonth] = useState(new Date().getMonth());
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [monthIncome, setMonthIncome] = useState(0);
+
+  /* ---------- FETCH WITH FILTER ---------- */
+  const fetchIncome = async () => {
+    try {
+      const params = new URLSearchParams({
+        category,
+        month,
+        year,
+      });
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/income?${params}`,
+        { credentials: "include" }
+      );
+
+      const data = await res.json();
+      setIncomes(data.incomes || []);
+      setMonthIncome(data.monthIncome || 0);
+    } catch {
+      toast.error("Failed to load income data");
+    }
+  };
+
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/income`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setIncomes(data.incomes || []))
-      .catch(() => toast.error("Failed to load income data"));
+    fetchIncome();
   }, []);
 
   /* ---------- KPIs ---------- */
-  const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
-  const highestIncome = Math.max(...incomes.map((i) => i.amount), 0);
+  const totalIncome = incomes.reduce((s, i) => s + i.amount, 0);
+  const highestIncome = incomes.length
+    ? Math.max(...incomes.map((i) => i.amount))
+    : 0;
   const incomeSources = new Set(incomes.map((i) => i.category)).size;
 
   /* ---------- DELETE ---------- */
   const deleteIncome = async (id) => {
     if (!window.confirm("Delete this income?")) return;
 
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/income/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/income/${id}`,
+      { method: "DELETE", credentials: "include" }
+    );
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        toast.error(data.message || "Failed to delete income");
-        return;
-      }
-
-      toast.success("Income deleted successfully");
-      setIncomes((prev) => prev.filter((i) => i._id !== id));
-    } catch {
-      toast.error("Server error");
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      toast.error(data.message || "Delete failed");
+      return;
     }
+
+    toast.success("Income deleted");
+    fetchIncome();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-base-200 to-success/20 p-6">
 
       {/* ---------- HEADER ---------- */}
-      <div className="max-w-6xl mx-auto mb-10 text-center">
+      <div className="max-w-6xl mx-auto mb-6 text-center">
         <h2 className="text-3xl font-bold text-success mb-2">
           Income Dashboard
         </h2>
-        <p className="text-gray-500">
-          Monitor your earnings and growth
-        </p>
+        <p className="text-gray-500">Monitor your earnings and growth</p>
+      </div>
+
+      {/* ---------- FILTERS ---------- */}
+      <div className="max-w-6xl mx-auto flex flex-wrap gap-3 mb-8 justify-center">
+        <select
+          className="select select-bordered"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="all">All Categories</option>
+          <option value="Salary">Salary</option>
+          <option value="Business">Business</option>
+          <option value="Investment">Investment</option>
+          <option value="Freelance">Freelance</option>
+          <option value="Gift">Gift</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <input
+          type="month"
+          className="input input-bordered"
+          value={`${year}-${String(month + 1).padStart(2, "0")}`}
+          onChange={(e) => {
+            const [y, m] = e.target.value.split("-");
+            setYear(Number(y));
+            setMonth(Number(m) - 1);
+          }}
+        />
+
+        <button onClick={fetchIncome} className="btn btn-success">
+          Apply Filter
+        </button>
       </div>
 
       {/* ---------- SUMMARY ---------- */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">Total Income</p>
-          <h3 className="text-2xl font-bold text-success">₹ {totalIncome}</h3>
+          <h3 className="text-2xl font-bold text-success">
+            ₹ {totalIncome}
+          </h3>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow p-6">
-          <p className="text-sm text-gray-500">This Month</p>
-          <h3 className="text-2xl font-bold text-primary">₹ {totalIncome}</h3>
+          <p className="text-sm text-gray-500">Filtered Month</p>
+          <h3 className="text-2xl font-bold text-primary">
+            ₹ {monthIncome}
+          </h3>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">Income Sources</p>
-          <h3 className="text-2xl font-bold text-info">{incomeSources}</h3>
+          <h3 className="text-2xl font-bold text-info">
+            {incomeSources}
+          </h3>
         </div>
 
         <div className="bg-base-100 rounded-2xl shadow p-6">
           <p className="text-sm text-gray-500">Highest Income</p>
-          <h3 className="text-2xl font-bold text-warning">₹ {highestIncome}</h3>
+          <h3 className="text-2xl font-bold text-warning">
+            ₹ {highestIncome}
+          </h3>
         </div>
       </div>
 
-      {/* ---------- ADD BUTTON ---------- */}
+      {/* ---------- ADD ---------- */}
       <div className="text-center mb-10">
         <button
           onClick={() => navigate("/income/add")}
-          className="btn btn-success px-6 shadow-md hover:scale-105 transition"
+          className="btn btn-success px-6"
         >
           Add New Income
         </button>
       </div>
 
       {/* ---------- LIST ---------- */}
-      {incomes.length === 0 ? (
+     {incomes.length === 0 ? (
         <div className="max-w-md mx-auto bg-base-100 shadow rounded-xl p-6 text-center">
           No income records found
         </div>

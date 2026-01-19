@@ -8,7 +8,7 @@ export default function Footer() {
 
         {/* LEFT: Brand */}
         <div className="flex flex-col gap-1">
-          <h2 className="font-bold text-lg">ExpenseTracko</h2>
+          <h2 className="font-bold text-lg">MyXpenso</h2>
           <p className="text-sm opacity-70">Track, Save & Grow your finances.</p>
           <p className="text-xs opacity-50 mt-1">© {new Date().getFullYear()} ExpenseTracko</p>
         </div>

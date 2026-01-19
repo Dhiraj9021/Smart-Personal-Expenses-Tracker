@@ -13,7 +13,7 @@ export default function EditExpense() {
 
   /* ================= FETCH EXPENSE ================= */
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/expense/${id}`, {
       credentials: "include",
     })
       .then((res) => res.json())

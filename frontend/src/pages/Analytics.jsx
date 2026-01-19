@@ -58,105 +58,98 @@ export default function Analytics() {
   const categoryTotals = data.categoryTotals || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-base-200 to-secondary/10 p-4 sm:p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-8">Financial Analytics</h1>
+  <div className="min-h-screen bg-gradient-to-br 
+    from-primary/10 via-base-200 to-secondary/10 
+    dark:from-base-300 dark:via-base-200 dark:to-base-300
+    p-4 sm:p-6">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
+    <h1 className="text-2xl sm:text-3xl font-bold text-center mb-8 text-base-content">
+      Financial Analytics
+    </h1>
 
-        {/* INCOME VS EXPENSE PIE */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow hover:shadow-lg transition">
-          <h2 className="font-semibold mb-4 text-lg sm:text-xl">Income vs Expense</h2>
-          {data.totalIncome === 0 && data.totalExpense === 0 ? (
-            <p className="text-center text-gray-400">No data available</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={incomeExpenseData}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={80}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {incomeExpenseData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v) => `₹ ${v}`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-7xl mx-auto">
 
-        {/* CATEGORY PIE */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow hover:shadow-lg transition">
-          <h2 className="font-semibold mb-4 text-lg sm:text-xl">Category-wise Expenses</h2>
-          {categoryData.length === 0 ? (
-            <p className="text-center text-gray-400">No expense data</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={40}
-                  outerRadius={80}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                >
-                  {categoryData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v) => `₹ ${v}`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* CATEGORY GRID */}
-        <div className="md:col-span-2">
-          <h2 className="text-lg sm:text-xl font-bold mb-4">Category Summary</h2>
-          {Object.keys(categoryTotals).length ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {Object.keys(categoryTotals).map((cat) => (
-                <div
-                  key={cat}
-                  className="bg-white/60 backdrop-blur-sm p-3 rounded-xl shadow text-center"
-                >
-                  <h4 className="font-semibold text-sm sm:text-base">{cat}</h4>
-                  <p className="text-red-500 font-bold text-sm sm:text-base">₹ {categoryTotals[cat]}</p>
-                </div>
+      {/* INCOME VS EXPENSE PIE */}
+      <div className="bg-base-100 dark:bg-base-200 p-6 rounded-2xl shadow-md text-base-content">
+        <h2 className="font-semibold mb-4 text-lg">Income vs Expense</h2>
+        <ResponsiveContainer width="100%" height={250}>
+          <PieChart>
+            <Pie
+              data={incomeExpenseData}
+              dataKey="value"
+              nameKey="name"
+              outerRadius={80}
+              label
+            >
+              {incomeExpenseData.map((_, i) => (
+                <Cell key={i} fill={COLORS[i]} />
               ))}
-            </div>
-          ) : (
-            <p>No expenses this month</p>
-          )}
-        </div>
+            </Pie>
+            <Tooltip formatter={(v) => `₹ ${v}`} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
 
-        {/* MONTHLY INCOME VS EXPENSE */}
-        <div className="md:col-span-2 bg-white p-4 sm:p-6 rounded-2xl shadow hover:shadow-lg transition">
-          <h2 className="font-semibold mb-4 text-lg sm:text-xl">Monthly Income vs Expense</h2>
-          {monthlyData.length === 0 ? (
-            <p className="text-center text-gray-400">No monthly records</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData} margin={{ top: 5, right: 15, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(v) => `₹ ${v}`} />
-                <Legend />
-                <Bar dataKey="income" fill="#22c55e" name="Income" />
-                <Bar dataKey="expense" fill="#ef4444" name="Expense" />
-                <Bar dataKey="recurring" fill="#f59e0b" name="Recurring" />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+      {/* CATEGORY PIE */}
+      <div className="bg-base-100 dark:bg-base-200 p-6 rounded-2xl shadow-md text-base-content">
+        <h2 className="font-semibold mb-4 text-lg">Category-wise Expenses</h2>
+        <ResponsiveContainer width="100%" height={250}>
+          <PieChart>
+            <Pie
+              data={categoryData}
+              dataKey="value"
+              nameKey="name"
+              innerRadius={40}
+              outerRadius={80}
+              label
+            >
+              {categoryData.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(v) => `₹ ${v}`} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* CATEGORY GRID */}
+      <div className="md:col-span-2">
+        <h2 className="text-lg font-bold mb-4 text-base-content">
+          Category Summary
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {Object.keys(categoryTotals).map((cat) => (
+            <div
+              key={cat}
+              className="bg-base-100 dark:bg-base-200 p-3 rounded-xl shadow text-center"
+            >
+              <h4 className="font-semibold">{cat}</h4>
+              <p className="text-error font-bold">₹ {categoryTotals[cat]}</p>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* MONTHLY BAR CHART */}
+      <div className="md:col-span-2 bg-base-100 dark:bg-base-200 p-6 rounded-2xl shadow-md text-base-content">
+        <h2 className="font-semibold mb-4 text-lg">Monthly Income vs Expense</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={monthlyData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip formatter={(v) => `₹ ${v}`} />
+            <Legend />
+            <Bar dataKey="income" fill="#22c55e" />
+            <Bar dataKey="expense" fill="#ef4444" />
+            <Bar dataKey="recurring" fill="#f59e0b" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
     </div>
-  );
+  </div>
+);
 }

@@ -3,8 +3,9 @@ const router = express.Router();
 
 const Expense = require("../models/Expense");
 const Income = require("../models/Income");
-const { generateAISummary } = require("../services/aiservices");
+const { generateAISummary, generateAiChatReply } = require("../services/aiservices");
 
+// Helper to get user's finance data
 async function getUserFinanceData(userId) {
   const expenses = await Expense.find({ userId });
   const incomes = await Income.find({ userId });
@@ -14,8 +15,7 @@ async function getUserFinanceData(userId) {
 
   const categoryTotals = {};
   expenses.forEach((e) => {
-    categoryTotals[e.category] =
-      (categoryTotals[e.category] || 0) + e.amount;
+    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
   });
 
   return {
@@ -24,23 +24,38 @@ async function getUserFinanceData(userId) {
     remaining: totalIncome - totalExpense,
     categoryTotals,
     expenseCount: expenses.length,
-    recurringCount: expenses.filter(e => e.isRecurring).length,
+    recurringCount: expenses.filter((e) => e.isRecurring).length,
   };
 }
 
+// Route for AI Chat Bot
 router.post("/", async (req, res) => {
   try {
-    if (!req.session.userId) {
-      return res.json({ reply: "Please login to view AI insights." });
-    }
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ reply: "Please login to use AI Assistant." });
 
-    const financeData = await getUserFinanceData(req.session.userId);
-    const aiReply = await generateAISummary(financeData);
+    const { message } = req.body;
+    if (!message || !message.trim())
+      return res.status(400).json({ reply: "Message cannot be empty." });
 
-    res.json({ reply: aiReply });
+    // Get user's finance data
+    const financeData = await getUserFinanceData(userId);
+
+    // Generate AI reply based on user's message & financial data
+    const aiReply = await generateAiChatReply(message, financeData);
+
+    // Optionally, also generate dashboard summary if message asks for it
+    // For example, you can detect if the user wants "summary"
+    
+      const summary = await generateAISummary(financeData);
+    
+
+    // Send a single response with both AI reply and optional summary
+    res.json({ reply: aiReply, summary });
+
   } catch (err) {
     console.error(err);
-    res.json({ reply: "AI service is currently unavailable." });
+    res.status(500).json({ reply: "AI service is currently unavailable." });
   }
 });
 

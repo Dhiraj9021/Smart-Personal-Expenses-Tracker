@@ -2,46 +2,44 @@ const mongoose = require("mongoose");
 const Income = require("../models/Income");
 const Expense = require("../models/Expense");
 const wrapAsync = require("../utils/wrapAsync");
-
-/* ================= GET MONTHLY INCOME ================= */
+/* ================= GET INCOME WITH FILTER ================= */
 exports.showIncome = wrapAsync(async (req, res) => {
   if (!req.session.userId) {
-    const err = new Error("Unauthorized");
-    err.status = 401;
-    throw err;
+    return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-  const incomes = await Income.find({
-    userId: req.session.userId
-  }).sort({ date: -1 });
+  const { month, year, category } = req.query;
 
-  const now = new Date();
+  const query = { userId: req.session.userId };
 
-  const monthlyIncome = incomes.filter(
-    (i) =>
-      i.date.getMonth() === now.getMonth() &&
-      i.date.getFullYear() === now.getFullYear()
-  );
+  /* ✅ CATEGORY FILTER */
+  if (category && category !== "all") {
+    query.category = category;
+  }
 
-  const totalIncome = monthlyIncome.reduce(
-    (sum, i) => sum + i.amount,
+  /* ✅ MONTH FILTER */
+  if (month !== undefined && year !== undefined) {
+    query.date = {
+      $gte: new Date(year, month, 1),
+      $lt: new Date(Number(year), Number(month) + 1, 1),
+    };
+  }
+
+  /* ✅ FETCH FILTERED INCOME */
+  const incomes = await Income.find(query).sort({ date: -1 });
+
+  /* ✅ MONTH TOTAL */
+  const monthIncome = incomes.reduce(
+    (sum, i) => sum + Number(i.amount),
     0
   );
 
   res.json({
     success: true,
-    incomes: monthlyIncome,
-    totalIncome
+    incomes,
+    monthIncome
   });
 });
-
-/*  EJS NOT SUPPORTED */
-exports.showAddIncomeForm = (req, res) => {
-  res.status(400).json({
-    success: false,
-    message: "Not supported in API mode"
-  });
-};
 
 /* ================= ADD INCOME ================= */
 exports.handleAddIncomeForm = wrapAsync(async (req, res) => {

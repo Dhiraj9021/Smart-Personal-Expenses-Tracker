@@ -1,4 +1,3 @@
-// controllers/expenseController.js
 const Expense = require("../models/Expense");
 const Income = require("../models/Income");
 const wrapAsync = require("../utils/wrapAsync");
@@ -12,7 +11,7 @@ exports.handleAddExpenseForm = wrapAsync(async (req, res) => {
     });
   }
 
-  let { title, amount, category, isRecurring, paymentMode} = req.body;
+  let { title, amount, category, isRecurring, paymentMode } = req.body;
 
   if (!title || !amount) {
     return res.status(422).json({
@@ -29,7 +28,7 @@ exports.handleAddExpenseForm = wrapAsync(async (req, res) => {
     });
   }
 
-  // ================= GET CURRENT MONTH INCOME =================
+  // Check remaining balance for current month
   const now = new Date();
   const monthIncomeRecords = await Income.find({
     userId: req.session.userId,
@@ -38,10 +37,8 @@ exports.handleAddExpenseForm = wrapAsync(async (req, res) => {
       $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0)
     }
   });
-
   const totalIncome = monthIncomeRecords.reduce((sum, i) => sum + i.amount, 0);
 
-  // ================= GET CURRENT MONTH EXPENSES =================
   const monthExpenses = await Expense.find({
     userId: req.session.userId,
     date: {
@@ -49,12 +46,10 @@ exports.handleAddExpenseForm = wrapAsync(async (req, res) => {
       $lte: new Date(now.getFullYear(), now.getMonth() + 1, 0)
     }
   });
-
   const totalExpense = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
 
   const remaining = totalIncome - totalExpense;
 
-  // ================= CHECK BALANCE =================
   if (amount > remaining) {
     return res.status(400).json({
       success: false,
@@ -62,7 +57,6 @@ exports.handleAddExpenseForm = wrapAsync(async (req, res) => {
     });
   }
 
-  // ================= CREATE EXPENSE =================
   const expense = await Expense.create({
     title,
     amount,
@@ -80,60 +74,65 @@ exports.handleAddExpenseForm = wrapAsync(async (req, res) => {
   });
 });
 
-/* ================= GET ALL EXPENSES ================= */
+/* ================= GET ALL EXPENSES WITH FILTER ================= */
 exports.showExpenses = wrapAsync(async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-  const expenses = await Expense.find({ userId: req.session.userId }).sort({ date: -1 });
-  const incomes = await Income.find({ userId: req.session.userId });
+  const { category, month, year, recurring } = req.query;
 
-  const now = new Date();
-  const monthExpenses = expenses.filter(
-    e => e.date.getMonth() === now.getMonth() && e.date.getFullYear() === now.getFullYear()
-  );
+  const query = { userId: req.session.userId };
 
-  const monthIncomes = incomes.filter(
-    i => i.date.getMonth() === now.getMonth() && i.date.getFullYear() === now.getFullYear()
-  );
+  if (category && category !== "all") {
+    query.category = category;
+  }
 
-  const totalIncome = monthIncomes.reduce((sum, i) => sum + i.amount, 0);
-  const totalExpense = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const remaining = totalIncome - totalExpense;
+  if (recurring === "true") query.isRecurring = true;
+  if (recurring === "false") query.isRecurring = false;
+
+  let isMonthFilterApplied = false;
+
+  if (month !== undefined && year !== undefined) {
+    isMonthFilterApplied = true;
+    query.date = {
+      $gte: new Date(year, month, 1),
+      $lte: new Date(year, Number(month) + 1, 0)
+    };
+  }
+
+  const expenses = await Expense.find(query).sort({ date: -1 });
+
+  // ✅ CALCULATE FILTERED MONTH EXPENSE
+  const monthExpense = isMonthFilterApplied
+    ? expenses.reduce((sum, e) => sum + e.amount, 0)
+    : 0;
 
   res.json({
     success: true,
     expenses,
-    totalIncome,
-    totalExpense,
-    remaining
+    monthExpense
   });
 });
 
+
 /* ================= GET SINGLE EXPENSE ================= */
 exports.getExpenseById = wrapAsync(async (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
+  if (!req.session.userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
   const expense = await Expense.findOne({
     _id: req.params.id,
     userId: req.session.userId
   });
 
-  if (!expense) {
-    return res.status(404).json({ success: false, message: "Expense not found" });
-  }
+  if (!expense) return res.status(404).json({ success: false, message: "Expense not found" });
 
   res.json({ success: true, expense });
 });
 
 /* ================= UPDATE EXPENSE ================= */
 exports.updateExpense = wrapAsync(async (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
+  if (!req.session.userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
   const updatedExpense = await Expense.findOneAndUpdate(
     { _id: req.params.id, userId: req.session.userId },
@@ -148,9 +147,7 @@ exports.updateExpense = wrapAsync(async (req, res) => {
     { new: true }
   );
 
-  if (!updatedExpense) {
-    return res.status(404).json({ success: false, message: "Expense not found" });
-  }
+  if (!updatedExpense) return res.status(404).json({ success: false, message: "Expense not found" });
 
   res.json({
     success: true,
@@ -161,18 +158,11 @@ exports.updateExpense = wrapAsync(async (req, res) => {
 
 /* ================= DELETE EXPENSE ================= */
 exports.deleteExpense = wrapAsync(async (req, res) => {
-  if (!req.session.userId) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
-  }
+  if (!req.session.userId) return res.status(401).json({ success: false, message: "Unauthorized" });
 
-  const deleted = await Expense.findOneAndDelete({
-    _id: req.params.id,
-    userId: req.session.userId
-  });
+  const deleted = await Expense.findOneAndDelete({ _id: req.params.id, userId: req.session.userId });
 
-  if (!deleted) {
-    return res.status(404).json({ success: false, message: "Expense not found" });
-  }
+  if (!deleted) return res.status(404).json({ success: false, message: "Expense not found" });
 
   res.json({ success: true, message: "Expense deleted successfully" });
 });
