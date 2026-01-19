@@ -1,3 +1,5 @@
+
+
 const express = require("express");
 const connectDB = require("./config/db");
 require("dotenv").config();
@@ -17,7 +19,7 @@ const app = express();
 app.set("trust proxy", 1); // REQUIRED for Render
 // --- CORS ---
 app.use(cors({
-  origin: ["https://expensetracko.vercel.app", "http://localhost:5173"],
+  origin: "https://expensetracko.vercel.app",
   credentials: true
 }));
 
@@ -34,15 +36,15 @@ app.use(session({
   name: "connect.sid",
   secret: process.env.SESSION_SECRET || "expense_tracker_secret",
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI
   }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
     httpOnly: true,
-    sameSite: "lax", // ✅ REQUIRED for Vercel → Render
-    secure: false     // ✅ REQUIRED (HTTPS)
+    sameSite: "none", // ✅ REQUIRED for Vercel → Render
+    secure: true      // ✅ REQUIRED (HTTPS)
   }
 }));
 
