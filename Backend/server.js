@@ -19,7 +19,7 @@ const app = express();
 app.set("trust proxy", 1); // REQUIRED for Render
 // --- CORS ---
 app.use(cors({
-  origin: "https://expensetracko.vercel.app",
+  origin: [ "https://myxpenso.vercel.app"],
   credentials: true
 }));
 
