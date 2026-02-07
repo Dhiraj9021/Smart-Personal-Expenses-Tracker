@@ -12,13 +12,13 @@ const {
 
 router.get("/", authMiddleware, showIncome);
 
-// ✅ GET SINGLE INCOME (for edit page)
+//  GET SINGLE INCOME (for edit page)
 router.get("/:id", authMiddleware, showEditIncomeForm);
 
 // Add
 router.post("/add", authMiddleware, handleAddIncomeForm);
 
-// ✅ UPDATE (React uses PUT)
+//  UPDATE (React uses PUT)
 router.put("/:id", authMiddleware, updateIncome);
 
 // Delete

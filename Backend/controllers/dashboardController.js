@@ -5,7 +5,7 @@ const { generateAISummary } = require("../services/aiservices");
 const wrapAsync = require("../utils/wrapAsync");
 
 exports.showDashboard = wrapAsync(async (req, res) => {
-  // 🔐 Auth check
+  //  Auth check
   if (!req.session.userId) {
     const err = new Error("Not logged in");
     err.status = 401;
@@ -71,8 +71,8 @@ exports.showDashboard = wrapAsync(async (req, res) => {
       categoryTotals,
     });
   } catch (aiErr) {
-    console.error("🤖 AI Error:", aiErr.message);
-    // ❗ Do NOT throw → dashboard must still load
+    console.error(" AI Error:", aiErr.message);
+    //  Do NOT throw → dashboard must still load
   }
 
   /* ================= RESPONSE ================= */

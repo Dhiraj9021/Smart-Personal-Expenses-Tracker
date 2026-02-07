@@ -29,7 +29,7 @@ exports.registerUser = wrapAsync(async (req, res) => {
     password: hashedPassword
   });
 
-  // ✅ SESSION
+  // SESSION
   req.session.userId = user._id.toString();
   req.session.username = user.username;
 
@@ -68,7 +68,7 @@ exports.loginUser = wrapAsync(async (req, res) => {
     });
   }
 
-  // ✅ SESSION
+  //  SESSION
   req.session.userId = user._id.toString();
   req.session.username = user.username;
 
@@ -90,7 +90,7 @@ exports.logoutUser = wrapAsync(async (req, res) => {
       });
     }
 
-    // ✅ IMPORTANT: cookie options must match session config
+    //  IMPORTANT: cookie options must match session config
     res.clearCookie("connect.sid", {
       path: "/",
       sameSite: "none",
